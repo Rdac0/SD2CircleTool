@@ -17,30 +17,55 @@ namespace SD2CircleTool.ViewModels
 {
     public class Onimai2TextViewModel : BindableBase
     {
-        private double x = 0; public double X { get { return x; } set { SetProperty(ref x, value); } }
-        private double y = 0; public double Y { get { return y; } set { SetProperty(ref y, value); } }
-        private double w = 800; public double W { get { return w; } set { SetProperty(ref w, value); } }
-        private double h = 450; public double H { get { return h; } set { SetProperty(ref h, value); } }
-        private int xRes = 166; public int XRes { get { return xRes; } set { SetProperty(ref xRes, value); } }
-        private int yRes = 94; public int YRes { get { return yRes; } set { SetProperty(ref yRes, value); } }
+        private double s2unitRatio = 800d / 448d;
 
-        private BitmapSource bgImage;
+        private Mat image;
+        private double imageRatio { get { return (double)image.Cols / (double)image.Rows; } }
+        private AlignmentInfo align;
 
-        public BitmapSource BGImage { get { return bgImage; } }
 
-        private BitmapSource fgImage;
+        #region Real Image Values
+        private double x; public double X { get { return x; } set { SetProperty(ref x, value); dX = value * s2unitRatio; } }
+        private double y; public double Y { get { return y; } set { SetProperty(ref y, value); dY = value * s2unitRatio; } }
+        private double w; public double W { get { return w; } set { SetProperty(ref w, value); h = (int)((double)value / resRatio); dW = value * s2unitRatio; dH = h * s2unitRatio; } }
+        private double h; public double H { get { return h; } set { SetProperty(ref h, value); w = (int)((double)value * resRatio); dH = value * s2unitRatio; dW = w * s2unitRatio; } }
 
-        public BitmapSource FGImage { get { return fgImage; } set { SetProperty(ref fgImage, value); } }
+        #endregion
+
+        #region Displayed Image Values
+        private double dx; public double dX { get { return dx; } set { SetProperty(ref dx, value); } }
+        private double dy; public double dY { get { return dy; } set { SetProperty(ref dy, value); } }
+        private double dw; public double dW { get { return dw; } set { SetProperty(ref dw, value); } }
+        private double dh; public double dH { get { return dh; } set { SetProperty(ref dh, value); } }
+
+        #endregion
+        private int xRes; public int XRes { get { return xRes; } set { SetProperty(ref xRes, Math.Clamp(value, 1, 9999)); if (uRes) { uRes = false; YRes = (int)((double)value / imageRatio); UpdateFGImage(); uRes = true; } } }
+        private int yRes; public int YRes { get { return yRes; } set { SetProperty(ref yRes, Math.Clamp(value, 1, 9999)); if (uRes) { uRes = false; XRes = (int)((double)value * imageRatio); UpdateFGImage(); uRes = true; } } }
+        private bool uRes = true;
+        private double resRatio { get { return (double)xRes / (double)yRes; } }
+
+        private BitmapSource bgImage;  public BitmapSource BGImage { get { return bgImage; } }
+        private BitmapSource fgImage;  public BitmapSource FGImage { get { return fgImage; } set { SetProperty(ref fgImage, value); } }
 
         private String _filePath; public String FilePath { get => _filePath; set => SetProperty(ref _filePath, value); }
         private bool _isPathValid = false;
 
         private void UpdateFGImage(string imgPath)
         {
-            Mat mat = new Mat(imgPath);
+            image = new Mat(imgPath); 
+            XRes = image.Cols; // calling this updates the image
+            if (imageRatio >= 16d / 9d) { W = 448; }
+            else { H = 448d * 9d / 16d; }
+        }
+
+        private void UpdateFGImage()
+        {
             Mat resizeMat = new Mat();
-            Cv2.Resize(mat, resizeMat, new OpenCvSharp.Size(xRes, yRes));
+            Cv2.Resize(image, resizeMat, new OpenCvSharp.Size(xRes, yRes));
             FGImage = BitmapSourceConverter.ToBitmapSource(resizeMat);
+            double tempw = W;
+            W = 1;
+            W = tempw;
         }
 
         public DelegateCommand OpenFileCommand => new(() =>
@@ -63,6 +88,13 @@ namespace SD2CircleTool.ViewModels
         {
             Mat bg = new Mat(@".\Assets\catMahiro.png");
             bgImage = BitmapSourceConverter.ToBitmapSource(bg);
+
+            align = AlignmentInfo.Center;
         }
+    }
+
+    enum AlignmentInfo
+    {
+        Left, Center, Right
     }
 }
