@@ -13,6 +13,7 @@
         <Menu Padding="5" Grid.Row="0">
             <MenuItem Command="{Binding ToCircleToolCommand}" Header="Circle Tool"/>
             <MenuItem Command="{Binding ToClassicinatorCommand}" Header="Classicinator"/>
+            <MenuItem Command="{Binding ToOnimaiCommand}" Header="Onimai2Text"/>
         </Menu>
 
         <ContentControl Grid.Row="1" prism:RegionManager.RegionName="MainRegion"/>

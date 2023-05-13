@@ -7,9 +7,17 @@ namespace SD2CircleTool.Views
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static MainWindow window;
+
+        public static MainWindow GetInstance()
+        {
+            return window;
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+            window = this;
         }
     }
 }

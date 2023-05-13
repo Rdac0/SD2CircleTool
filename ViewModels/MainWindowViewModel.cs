@@ -28,12 +28,20 @@ namespace SD2CircleTool.ViewModels
         {
             _regionManager.RequestNavigate("MainRegion", "Classicinator");
         });
+        public DelegateCommand ToOnimaiCommand => new(() =>
+        {
+            MainWindow window;
+            window = MainWindow.GetInstance();
+            window.Width = window.Width < 1200 ? 1200 : window.Width;
+            _regionManager.RequestNavigate("MainRegion", "Onimai2Text");
+        });
 
         public MainWindowViewModel(IRegionManager regionManager)
         {
             _regionManager = regionManager;
             _regionManager.RegisterViewWithRegion("MainRegion", typeof(CircleTool));
             _regionManager.RegisterViewWithRegion("MainRegion", typeof(Classicinator));
+            _regionManager.RegisterViewWithRegion("MainRegion", typeof(Onimai2Text));
         }
     }
 }
