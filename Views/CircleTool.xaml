@@ -1,0 +1,125 @@
+﻿<UserControl x:Class="SD2CircleTool.Views.CircleTool"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SD2CircleTool.Views"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="590" d:DesignWidth="850">
+    <Grid HorizontalAlignment="Stretch" Background="White">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="550"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Canvas Grid.Column="0" Background="LightGray" Width="550" Height="550" VerticalAlignment="Top">
+            <Ellipse Panel.ZIndex="1" Fill="White" Stroke="Black" Canvas.Left="25" Canvas.Top="25" Width="500" Height="500" />
+            <Ellipse Panel.ZIndex="2" Fill="GreenYellow" Stroke="Black" Canvas.Left="{Binding CirX}" Canvas.Top="{Binding CirY}" Width="{Binding CirD}" Height="{Binding CirD}" Opacity="0.5"/>
+            <Ellipse Panel.ZIndex="2" Fill="Red" Stroke="Black" Canvas.Left="{Binding CirX2}" Canvas.Top="{Binding CirY2}" Width="{Binding CirD2}" Height="{Binding CirD2}" Opacity="0.5" IsEnabled="{Binding Wave}"/>
+        </Canvas>
+
+        <Grid Grid.Column="1" Margin="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="65"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Enemies:" Margin="2" Grid.Column="0" Grid.Row="0"/>
+            <TextBox Text="{Binding Enemies}" Margin="2" Width="40" TextAlignment="Right" Grid.Column="1" Grid.Row="0"/>
+            <Slider Margin="2" Minimum="1" Maximum="64" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Enemies}" HorizontalAlignment="Stretch" Grid.Column="2" Grid.Row="0"/>
+
+            <TextBlock Text="- Bullet" Margin="2 26 2 2" Grid.Column="0" Grid.Row="1"/>
+
+            <TextBlock Text="Rows:" Margin="2" Grid.Column="0" Grid.Row="2"/>
+            <TextBox Text="{Binding Rows}" Margin="2" Width="40" TextAlignment="Right" Grid.Column="1" Grid.Row="2"/>
+            <Slider Margin="2" Minimum="1" Maximum="30" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Rows}" HorizontalAlignment="Stretch" Grid.Column="2" Grid.Row="2"/>
+
+            <TextBlock Text="Speed:" Margin="2" Grid.Column="0" Grid.Row="3"/>
+            <StackPanel Grid.Column="1" Grid.Row="3">
+                <TextBox Text="{Binding Speed}" Margin="2" Width="40" TextAlignment="Right"/>
+                <TextBox Text="{Binding Speed2}" Margin="2" Width="40" TextAlignment="Right" IsEnabled="{Binding Wave}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Grid.Row="3">
+                <Slider Margin="2" Minimum="0" Maximum="30" TickFrequency="0.5" IsSnapToTickEnabled="True" Value="{Binding Speed}" HorizontalAlignment="Stretch"/>
+                <Slider Margin="2" Minimum="0" Maximum="30" TickFrequency="0.5" IsSnapToTickEnabled="True" Value="{Binding Speed2}" HorizontalAlignment="Stretch" IsEnabled="{Binding Wave}"/>
+            </StackPanel>
+
+            <TextBlock Text="Clockwise?" Margin="2" Grid.Column="0" Grid.Row="4"/>
+            <StackPanel Grid.Column="1" Grid.Row="4">
+                <CheckBox Margin="2" IsChecked="{Binding IsCW, UpdateSourceTrigger=PropertyChanged}" />
+                <CheckBox Margin="2" IsChecked="{Binding IsCW2, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Wave}" />
+            </StackPanel>
+            <TextBlock Text="Checked: CW, Unchecked: CCW" Margin="2" Grid.Column="2" Grid.Row="4"/>
+
+            <TextBlock Text="- Circle" Margin="2 26 2 2" Grid.Column="0" Grid.Row="5"/>
+
+            <TextBlock Text="X:" Margin="2" Grid.Column="0" Grid.Row="6"/>
+            <StackPanel Grid.Column="1" Grid.Row="6">
+                <TextBox Text="{Binding X}" Margin="2" Width="40" TextAlignment="Right" />
+                <TextBox Text="{Binding X2}" Margin="2" Width="40" TextAlignment="Right" IsEnabled="{Binding Wave}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Grid.Row="6">
+                <Slider Margin="2" Minimum="-1" Maximum="1" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding X, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                <Slider Margin="2" Minimum="-1" Maximum="1" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding X2, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" IsEnabled="{Binding Wave}"/>
+            </StackPanel>
+
+            <TextBlock Text="Y:" Margin="2" Grid.Column="0" Grid.Row="7"/>
+            <StackPanel Grid.Column="1" Grid.Row="7">
+                <TextBox Text="{Binding Y}" Margin="2" Width="40" TextAlignment="Right" />
+                <TextBox Text="{Binding Y2}" Margin="2" Width="40" TextAlignment="Right" IsEnabled="{Binding Wave}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Grid.Row="7">
+                <Slider Margin="2" Minimum="-1" Maximum="1" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding Y, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                <Slider Margin="2" Minimum="-1" Maximum="1" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding Y2, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" IsEnabled="{Binding Wave}"/>
+            </StackPanel>
+
+            <TextBlock Text="Diameter:" Margin="2" Grid.Column="0" Grid.Row="8"/>
+            <StackPanel Grid.Column="1" Grid.Row="8">
+                <TextBox Text="{Binding D}" Margin="2" Width="40" TextAlignment="Right" />
+                <TextBox Text="{Binding D2}" Margin="2" Width="40" TextAlignment="Right" IsEnabled="{Binding Wave}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Grid.Row="8">
+                <Slider Margin="2" Minimum="0" Maximum="2" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding D, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                <Slider Margin="2" Minimum="0" Maximum="2" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding D2, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" IsEnabled="{Binding Wave}"/>
+            </StackPanel>
+
+            <TextBlock Text="Time:" Margin="2" Grid.Column="0" Grid.Row="9"/>
+            <TextBox Text="{Binding Time}" Margin="2" Width="40" Grid.Column="1" Grid.Row="9"/>
+
+            <TextBlock Text="ID:" Margin="2" Grid.Column="0" Grid.Row="10"/>
+            <TextBox Text="{Binding ID}" Margin="2" Width="40" Height="18" Grid.Column="1" Grid.Row="10" VerticalAlignment="Top"/>
+            <TextBlock Text="Prevents Prefab Clash. High number recommended. Change for every circle." Margin="2" Grid.Column="2" Grid.Row="10" TextWrapping="Wrap"/>
+
+            <Button Content="Make Circle" Margin="2" Grid.Column="2" Grid.Row="12" HorizontalAlignment="Right" Height="24" Width="72" Command="{Binding MakeCircle}"/>
+
+        </Grid>
+
+
+        <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+
+
+
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
