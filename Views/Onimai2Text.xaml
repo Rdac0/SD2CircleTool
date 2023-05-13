@@ -9,19 +9,18 @@
              mc:Ignorable="d" 
              d:DesignHeight="590" d:DesignWidth="1200">
 
-    <Grid HorizontalAlignment="Stretch" Background="White">
+    <Grid HorizontalAlignment="Stretch" Background="White" Margin="2">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="800"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Canvas Grid.Column="0" Width="800" Height="450" VerticalAlignment="Top">
+        <Canvas Grid.Column="0" Width="800" Height="450" VerticalAlignment="Top" Margin="10">
             <Canvas.Background>
                 <ImageBrush ImageSource="{Binding BGImage}"/>
             </Canvas.Background>
 
-            <Rectangle Panel.ZIndex="1"
-                       Canvas.Left="{Binding dX}"
+            <Rectangle Canvas.Left="{Binding dX}"
                        Canvas.Top="{Binding dY}"
                        Width="{Binding dW}"
                        Height="{Binding dH}"
@@ -29,6 +28,9 @@
                 <Rectangle.Fill>
                     <ImageBrush ImageSource="{Binding FGImage}"/>
                 </Rectangle.Fill>
+                <Rectangle.RenderTransform>
+                    <RotateTransform CenterX="0" CenterY="0" Angle="{Binding Angle}" />
+                </Rectangle.RenderTransform>
             </Rectangle>
         </Canvas>
 
@@ -36,7 +38,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="70"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -51,24 +53,52 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-
-            <TextBox    Grid.Column="0"     Grid.Row="0"    Margin="2"  Grid.ColumnSpan="2" Text="{Binding FilePath}"/>
+            <TextBlock  Grid.Column="0"     Grid.Row="0"    Margin="2"  Text="Image:"/>
+            <TextBox    Grid.Column="1"     Grid.Row="0"    Margin="2"  Text="{Binding FilePath}" HorizontalContentAlignment="Right"/>
             <Button     Grid.Column="2"     Grid.Row="0"    Margin="2"  Content=" Browse... " Command="{Binding OpenFileCommand}"/>
             
             <TextBlock  Grid.Column="0"     Grid.Row="1"    Margin="2"  Text="Resolution:"/>
-            <Grid       Grid.Column="1"     Grid.Row="1" >
+            <Grid       Grid.Column="1"     Grid.Row="1"    Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="25"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="25"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Margin="2" Text="X: " HorizontalAlignment="Right"/>
                 <TextBox   Grid.Column="1" Margin="2" Text="{Binding XRes, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBlock Grid.Column="2" Margin="2" Text="Y: " HorizontalAlignment="Right"/>
                 <TextBox   Grid.Column="3" Margin="2" Text="{Binding YRes, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Grid.Column="4" Margin="2" Text=" Keep Aspect Ratio? " HorizontalAlignment="Right"/>
+                <CheckBox  Grid.Column="5" Margin="2" IsChecked="{Binding KeepRatio, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
+
+            <TextBlock  Grid.Column="1"     Grid.Row="2"    Margin="2"  Text="Alignment: " HorizontalAlignment="Right"/>
+            <TextBlock  Grid.Column="1"     Grid.Row="2"    Margin="2"  Text="{Binding Alignment}" HorizontalAlignment="Left"/>
+            <ComboBox   Grid.Column="2"     Grid.Row="2"    Margin="2"  ItemsSource="{Binding Alignments}" SelectedItem="{Binding Alignment}"/>
+
+            <TextBlock  Grid.Column="0"     Grid.Row="2"    Margin="2"  Text="Position:"/>
+            <TextBlock  Grid.Column="0"     Grid.Row="3"    Margin="2"  Text="X: " HorizontalAlignment="Left"/>
+            <TextBox    Grid.Column="0"     Grid.Row="3"    Margin="2"  Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Width="75" HorizontalAlignment="Right" HorizontalContentAlignment="Left"/>
+            <Slider     Grid.Column="1"     Grid.Row="3"    Margin="2"  Grid.ColumnSpan="2" Value="{Binding X, UpdateSourceTrigger=PropertyChanged}" Minimum="-250" Maximum="250" TickFrequency="1" IsSnapToTickEnabled="True"/>
+            <TextBlock  Grid.Column="0"     Grid.Row="4"    Margin="2"  Text="Y: " HorizontalAlignment="Left"/>
+            <TextBox    Grid.Column="0"     Grid.Row="4"    Margin="2"  Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Width="75" HorizontalAlignment="Right" HorizontalContentAlignment="Left"/>
+            <Slider     Grid.Column="1"     Grid.Row="4"    Margin="2"  Grid.ColumnSpan="2" Value="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Minimum="-250" Maximum="250" TickFrequency="1" IsSnapToTickEnabled="True"/>
+            <TextBlock  Grid.Column="0"     Grid.Row="5"    Margin="2"  Text="θ: " HorizontalAlignment="Left"/>
+            <TextBox    Grid.Column="0"     Grid.Row="5"    Margin="2"  Text="{Binding Angle, UpdateSourceTrigger=PropertyChanged}" Width="75" HorizontalAlignment="Right" HorizontalContentAlignment="Left"/>
+            <Slider     Grid.Column="1"     Grid.Row="5"    Margin="2"  Grid.ColumnSpan="2" Value="{Binding Angle, UpdateSourceTrigger=PropertyChanged}" Minimum="-360" Maximum="360" TickFrequency="1" IsSnapToTickEnabled="True"/>
+
+            <TextBlock  Grid.Column="0"     Grid.Row="6"    Margin="2"  Text="Size:"/>
+            <TextBlock  Grid.Column="0"     Grid.Row="7"    Margin="2"  Text="X: " HorizontalAlignment="Left"/>
+            <TextBox    Grid.Column="0"     Grid.Row="7"    Margin="2"  Text="{Binding W, UpdateSourceTrigger=PropertyChanged}" Width="75" HorizontalAlignment="Right" HorizontalContentAlignment="Left"/>
+            <Slider     Grid.Column="1"     Grid.Row="7"    Margin="2"  Grid.ColumnSpan="2" Value="{Binding W, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="250" TickFrequency="1" IsSnapToTickEnabled="True"/>
+            <TextBlock  Grid.Column="0"     Grid.Row="8"    Margin="2"  Text="Y: " HorizontalAlignment="Left"/>
+            <TextBox    Grid.Column="0"     Grid.Row="8"    Margin="2"  Text="{Binding H, UpdateSourceTrigger=PropertyChanged}" Width="75" HorizontalAlignment="Right" HorizontalContentAlignment="Left"/>
+            <Slider     Grid.Column="1"     Grid.Row="8"    Margin="2"  Grid.ColumnSpan="2" Value="{Binding H, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="250" TickFrequency="1" IsSnapToTickEnabled="True"/>
+
         </Grid>
     </Grid>
 </UserControl>
