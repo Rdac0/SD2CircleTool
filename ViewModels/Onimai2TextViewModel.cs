@@ -58,8 +58,13 @@ namespace SD2CircleTool.ViewModels
 
         private void UpdateFGImage(string imgPath)
         {
-            image = new Mat(imgPath); 
-            XRes = image.Cols; // calling this updates the image
+            image = new Mat(imgPath);
+
+            XRes = image.Cols;// calling this updates the image
+            KeepRatio = false;
+            YRes = image.Rows;
+            KeepRatio = true; 
+
             if (imageRatio >= 16d / 9d) { W = 448; }
             else { H = 448d * 9d / 16d; }
         }
@@ -69,16 +74,16 @@ namespace SD2CircleTool.ViewModels
             Mat resizeMat = new Mat();
             Cv2.Resize(image, resizeMat, new OpenCvSharp.Size(xRes, yRes));
             FGImage = BitmapSourceConverter.ToBitmapSource(resizeMat);
-            double tempw = W;
+            double tW = W;
             W = 1;
-            W = tempw;
+            W = tW;
         }
 
         // Turn real coords to display coords
         private void UpdateRectPosition()
         {
             dW = W * s2unitRatio; 
-            dH = h * s2unitRatio;
+            dH = H * s2unitRatio;
 
             double tx = 224;
             double ty = 126;
@@ -141,6 +146,46 @@ namespace SD2CircleTool.ViewModels
                 _isPathValid = true;
                 UpdateFGImage(FilePath);
             }
+        });
+
+        public DelegateCommand ResetResCommand => new(() =>
+        {
+            KeepRatio = false;
+            XRes = image.Cols;
+            YRes = image.Rows;
+            KeepRatio = true;
+        });
+
+        public DelegateCommand CenterCommand => new(() =>
+        {
+            X = 0;
+            Y = 0;
+            switch (Alignment)
+            {
+                case AlignmentInfo.Left:
+                    X -= W * 0.5d;
+                    break;
+                case AlignmentInfo.Right:
+                    X += W * 0.5d;
+                    break;
+                case AlignmentInfo.Center:
+                default:
+                    break;
+            }
+        });
+
+        public DelegateCommand FitCommand => new(() =>
+        {
+            if (imageRatio >= 16d / 9d) { W = 448; }
+            else { H = 448d * 9d / 16d; }
+            CenterCommand.Execute();
+        });
+
+        public DelegateCommand FillCommand => new(() =>
+        {
+            if (imageRatio <= 16d / 9d) { W = 448; }
+            else { H = 448d * 9d / 16d; }
+            CenterCommand.Execute();
         });
 
         public Onimai2TextViewModel()
