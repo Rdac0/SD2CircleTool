@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.IO;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using Prism.Commands;
 using Prism.Mvvm;
 using OpenCvSharp;
@@ -21,6 +22,7 @@ namespace SD2CircleTool.ViewModels
         private double s2unitRatio = 800d / 448d;
 
         private Mat image;
+        private Mat resizeImage;
         private double imageRatio { get { return (double)image.Cols / (double)image.Rows; } }
         private bool keepRatio; public bool KeepRatio { get { return keepRatio; } set { SetProperty(ref keepRatio, value); } }
         private AlignmentInfo alignment; public AlignmentInfo Alignment { get { return alignment; } set { SetProperty(ref alignment, value); UpdateRectPosition(); } }
@@ -43,22 +45,28 @@ namespace SD2CircleTool.ViewModels
         private double dh; public double dH { get { return dh; } set { SetProperty(ref dh, value); } }
 
         #endregion
+
+
         private int xRes; public int XRes { get { return xRes; } set { SetProperty(ref xRes, Math.Clamp(value, 1, 9999)); if (uRes) { uRes = false; if (KeepRatio) { YRes = (int)((double)value / imageRatio); } UpdateFGImage(); uRes = true; } } }
         private int yRes; public int YRes { get { return yRes; } set { SetProperty(ref yRes, Math.Clamp(value, 1, 9999)); if (uRes) { uRes = false; if (KeepRatio) { XRes = (int)((double)value * imageRatio); } UpdateFGImage(); uRes = true; } } }
         private bool uRes = true;
         private double resRatio { get { return (double)xRes / (double)yRes; } }
 
-
+        private double time; public double Time { get { return time; } set { SetProperty(ref time, value); } }
+        private double duration; public double Duration { get { return duration; } set { SetProperty(ref duration, value); } }
+        private double fadein; public double FadeIn { get { return fadein; } set { SetProperty(ref fadein, value); } }
+        private double fadeout; public double FadeOut { get { return fadeout; } set { SetProperty(ref fadeout, value); } }
 
         private BitmapSource bgImage;  public BitmapSource BGImage { get { return bgImage; } }
         private BitmapSource fgImage;  public BitmapSource FGImage { get { return fgImage; } set { SetProperty(ref fgImage, value); } }
 
         private String _filePath; public String FilePath { get => _filePath; set => SetProperty(ref _filePath, value); }
         private bool _isPathValid = false;
+        private string imageText = "";
 
         private void UpdateFGImage(string imgPath)
         {
-            image = new Mat(imgPath);
+            image = new Mat(imgPath).CvtColor(ColorConversionCodes.BGR2BGRA);
 
             XRes = image.Cols;// calling this updates the image
             KeepRatio = false;
@@ -71,9 +79,8 @@ namespace SD2CircleTool.ViewModels
 
         private void UpdateFGImage()
         {
-            Mat resizeMat = new Mat();
-            Cv2.Resize(image, resizeMat, new OpenCvSharp.Size(xRes, yRes));
-            FGImage = BitmapSourceConverter.ToBitmapSource(resizeMat);
+            Cv2.Resize(image, resizeImage, new OpenCvSharp.Size(xRes, yRes));
+            FGImage = BitmapSourceConverter.ToBitmapSource(resizeImage);
             double tW = W;
             W = 1;
             W = tW;
@@ -188,10 +195,101 @@ namespace SD2CircleTool.ViewModels
             CenterCommand.Execute();
         });
 
+        public unsafe DelegateCommand SaveCommand => new(() =>
+        {
+            imageText = "";
+
+            // Beginning Text Meta
+            imageText += String.Format(new CultureInfo("en-US"), "  <Text time=\"{0:N3}\" txt=\"&lt;cspace=-.16em&gt;&lt;line-height=52%&gt;", Time);
+
+            // Actual Text
+            string[] imageTextLines = new string[yRes];
+
+            Parallel.For(0, yRes, i =>
+            {
+                imageTextLines[i] = "";
+
+                switch (Alignment)
+                {
+                    case AlignmentInfo.Left:
+                        imageTextLines[i] += @"&lt;space=-0.06em&gt;";
+                        break;
+                    case AlignmentInfo.Right:
+                        break;
+                    case AlignmentInfo.Center:
+                    default:
+                        imageTextLines[i] += @"&lt;space=-0.32em&gt;";
+                        break;
+
+                }
+
+                Vec4b* rowPtr = (Vec4b*)resizeImage.Ptr(i);
+
+                string prevColStr = "";
+
+                for (int j = 0; j< xRes; j++)
+                {
+                    string currColStr = "";
+
+                    currColStr += BitConverter.ToString(new byte[] { rowPtr[j][2] });
+                    currColStr += BitConverter.ToString(new byte[] { rowPtr[j][1] });
+                    currColStr += BitConverter.ToString(new byte[] { rowPtr[j][0] });
+                    if (rowPtr[j][3] < 255)
+                    {
+                        currColStr += BitConverter.ToString(new byte[] { rowPtr[j][3] });
+                    }
+
+                    if (currColStr != prevColStr)
+                    {
+                        imageTextLines[i] += @"&lt;color=#";
+                        imageTextLines[i] += currColStr;
+                        imageTextLines[i] += @"&gt;■";
+
+                        prevColStr = currColStr;
+                    }
+                    else
+                    {
+                        imageTextLines[i] += @"■";
+                    }
+                }
+
+                imageTextLines[i] += @"\n";
+            });
+
+            for(int i =0; i < yRes; i++)
+            {
+                imageText += imageTextLines[i];
+            }
+
+            double size = (W / 448d) * (332 / (double)XRes);
+            string just = "";
+            switch (Alignment)
+            {
+                case AlignmentInfo.Left:
+                    just = "l";
+                    break;
+                case AlignmentInfo.Right:
+                    just = "r";
+                    break;
+                case AlignmentInfo.Center:
+                default:
+                    just = "c";
+                    break;
+
+            }
+
+            imageText += String.Format(new CultureInfo("en-US"), "\" size=\"{0:N3},{0:N3}\" dur=\"{1:N3}\" pos=\"{2:N3},{3:N3}\" fade=\"{4:N3},{5:N3}\" just=\"{6}\" col=\"FFFFFFFF\" font=\"noto thin none\" purp=\"always_on\" angle=\"{7:N3}\" lyr=\"10\" />",
+                size, duration, X, Y, FadeIn, FadeOut, just, Angle);
+
+            File.WriteAllText(FilePath + ".txt", imageText);
+
+        });
+
         public Onimai2TextViewModel()
         {
             Mat bg = new Mat(@".\Assets\catMahiro.png");
             bgImage = BitmapSourceConverter.ToBitmapSource(bg);
+            resizeImage = new Mat();
 
             KeepRatio = true;
 
@@ -207,6 +305,11 @@ namespace SD2CircleTool.ViewModels
             };
 
             Alignment = AlignmentInfo.Center;
+
+            Time = 0;
+            Duration = 1;
+            FadeIn = 0;
+            FadeOut = 0;
         }
     }
 

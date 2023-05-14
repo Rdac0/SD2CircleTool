@@ -3,6 +3,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
 	<PublishSingleFile>true</PublishSingleFile>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
   <ItemGroup>

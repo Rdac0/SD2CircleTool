@@ -51,6 +51,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock  Grid.Column="0"     Grid.Row="0"    Margin="2"  Text="Image:"/>
@@ -113,6 +114,18 @@
             <TextBox    Grid.Column="0"     Grid.Row="8"    Margin="2"  Text="{Binding H, UpdateSourceTrigger=PropertyChanged}" Width="75" HorizontalAlignment="Right" HorizontalContentAlignment="Left"/>
             <Slider     Grid.Column="1"     Grid.Row="8"    Margin="2"  Grid.ColumnSpan="2" Value="{Binding H, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="250" TickFrequency="1" IsSnapToTickEnabled="True"/>
 
+            <StackPanel Grid.Column="0"     Grid.Row="9"    Margin="2"  Grid.ColumnSpan="3" Orientation="Horizontal">
+                <TextBlock  Text="Time: "/>
+                <TextBox    Text="{Binding Time}" Width="50"/>
+                <TextBlock  Text=" Dur: "/>
+                <TextBox    Text="{Binding Duration}" Width="50"/>
+                <TextBlock  Text=" In: "/>
+                <TextBox    Text="{Binding FadeIn}" Width="50"/>
+                <TextBlock  Text=" Out: "/>
+                <TextBox    Text="{Binding FadeOut}" Width="50"/>
+            </StackPanel>
+            
+            <Button     Grid.Column="1"     Grid.Row="10"    Margin="2"  Grid.ColumnSpan="2" Width="115" Content="Save Image to Text" Command="{Binding SaveCommand}" HorizontalAlignment="Right"/>
         </Grid>
     </Grid>
 </UserControl>
