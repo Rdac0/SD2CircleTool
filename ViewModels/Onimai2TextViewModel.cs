@@ -315,7 +315,7 @@ namespace SD2CircleTool.ViewModels
 
         public Onimai2TextViewModel()
         {
-            Mat bg = new Mat(@".\Assets\catMahiro.png");
+            Mat bg = new Mat(@".\Assets\catMahiroOver.png");
             bgImage = BitmapSourceConverter.ToBitmapSource(bg);
             resizeImage = new Mat();
 

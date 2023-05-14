@@ -15,6 +15,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="Assets\catMahiro.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\catMahiroOver.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\catMashiroOver.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Assets\catOnimai.png">
