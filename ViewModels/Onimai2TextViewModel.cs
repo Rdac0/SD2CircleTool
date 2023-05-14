@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.IO;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Diagnostics;
 using Prism.Commands;
 using Prism.Mvvm;
 using OpenCvSharp;
@@ -35,6 +37,9 @@ namespace SD2CircleTool.ViewModels
         private double w; public double W { get { return w; } set { SetProperty(ref w, value); if (u) { u = false; H = (double)value / resRatio; u = true; } UpdateRectPosition(); } }
         private double h; public double H { get { return h; } set { SetProperty(ref h, value); if (u) { u = false; W = (double)value * resRatio; u = true; } UpdateRectPosition(); } }
         private bool u = true;
+
+        private double ogXRes; public double OgXRes { get { return ogXRes; } set { SetProperty(ref ogXRes, value); UpdateRectPosition(); } }
+        private double ogYRes; public double OgYRes { get { return ogYRes; } set { SetProperty(ref ogYRes, value); UpdateRectPosition(); } }
 
         #endregion
 
@@ -72,6 +77,9 @@ namespace SD2CircleTool.ViewModels
             KeepRatio = false;
             YRes = image.Rows;
             KeepRatio = true; 
+
+            OgXRes = image.Cols;
+            OgYRes = image.Rows;
 
             if (imageRatio >= 16d / 9d) { W = 448; }
             else { H = 448d * 9d / 16d; }
@@ -163,6 +171,14 @@ namespace SD2CircleTool.ViewModels
             KeepRatio = true;
         });
 
+        public DelegateCommand CompromiseResCommand => new(() =>
+        {
+            KeepRatio = true;
+            if (imageRatio > 16d / 9d) { XRes = 448; }
+            else { YRes = 252; }
+        });
+
+
         public DelegateCommand CenterCommand => new(() =>
         {
             X = 0;
@@ -197,6 +213,14 @@ namespace SD2CircleTool.ViewModels
 
         public unsafe DelegateCommand SaveCommand => new(() =>
         {
+            if (xRes * yRes >= 230400) // 360p image widescreen
+            {
+                if (MessageBox.Show("Warning, a text object this large may severely lag, and/or even crash your game! \n Continue?", "Warning!", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+
             imageText = "";
 
             // Beginning Text Meta
@@ -282,6 +306,10 @@ namespace SD2CircleTool.ViewModels
                 size, duration, X, Y, FadeIn, FadeOut, just, Angle);
 
             File.WriteAllText(FilePath + ".txt", imageText);
+
+            MessageBox.Show("Save Complete!");
+
+            Process.Start("explorer.exe", Path.GetDirectoryName(FilePath));
 
         });
 
