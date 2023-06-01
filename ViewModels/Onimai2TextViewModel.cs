@@ -71,7 +71,7 @@ namespace SD2CircleTool.ViewModels
 
         private void UpdateFGImage(string imgPath)
         {
-            image = new Mat(imgPath).CvtColor(ColorConversionCodes.BGR2BGRA);
+            image = new Mat(imgPath, ImreadModes.Unchanged).CvtColor(ColorConversionCodes.BGR2BGRA);
 
             XRes = image.Cols;// calling this updates the image
             KeepRatio = false;
@@ -174,8 +174,7 @@ namespace SD2CircleTool.ViewModels
         public DelegateCommand CompromiseResCommand => new(() =>
         {
             KeepRatio = true;
-            if (imageRatio > 16d / 9d) { XRes = 448; }
-            else { YRes = 252; }
+            XRes = (int)Math.Sqrt(100000 * imageRatio);
         });
 
 
@@ -213,9 +212,9 @@ namespace SD2CircleTool.ViewModels
 
         public unsafe DelegateCommand SaveCommand => new(() =>
         {
-            if (xRes * yRes >= 230400) // 360p image widescreen
+            if (xRes * yRes >= 100000) // SD2 Limit
             {
-                if (MessageBox.Show("Warning, a text object this large may severely lag, and/or even crash your game! \n Continue?", "Warning!", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                if (MessageBox.Show("Warning, this text object is too high resolution to be rendered using 1 text object in Soundodger 2. \n Continue?", "Warning!", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                 {
                     return;
                 }

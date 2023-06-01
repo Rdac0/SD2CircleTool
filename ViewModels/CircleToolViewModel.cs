@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Globalization;
 using Prism.Commands;
 using Prism.Mvvm;
+using OpenCvSharp;
 
 namespace SD2CircleTool.ViewModels
 {
@@ -144,6 +145,45 @@ namespace SD2CircleTool.ViewModels
             Clipboard.SetText(String.Join("\r\n", markers));
             MessageBox.Show("Copied: \r\n \r\n" + String.Join("\r\n", markers));
         });
+
+        public DelegateCommand TestCommand => new(() =>
+        {
+            Point2f[] src = new Point2f[3];
+            Point2f[] dst = new Point2f[3];
+            src[2] = new Point2f(0, 0);
+            src[0] = new Point2f(1, 0);
+            src[1] = new Point2f(0, 1);
+            dst[2] = new Point2f(2, 0); // Translate x+2
+            dst[0] = new Point2f(2, 1);
+            dst[1] = new Point2f(1, 0);
+            Mat P = Cv2.GetAffineTransform(src, dst); // found: the translate value is always of 0, 0
+            Mat P2 = Cv2.EstimateAffinePartial2D(InputArray.Create<Point2f>(src), InputArray.Create<Point2f>(dst));
+            double[][] PArr= debugMat<double>(P2);
+            int test = 0;
+        });
+
+        T[][] debugMat<T>(Mat mat) where T : unmanaged
+        {
+            int counter = 0;
+            T[][] result = new T[mat.Rows][];
+
+            if (mat.Rows > 0 && mat.Cols > 0)
+            {
+                for (int i = 0; i < mat.Rows; i++)
+                {
+                    result[i] = new T[mat.Cols];
+                    for (int j = 0; j < mat.Cols; j++)
+                    {
+                        var stuff = mat.At<T>(i, j);
+                        result[i][j] = stuff;
+
+                        counter++;
+                    }
+                }
+            }
+
+            return result;
+        }
 
         public CircleToolViewModel()
         {
