@@ -9,6 +9,7 @@ using System.Globalization;
 using Prism.Commands;
 using Prism.Mvvm;
 using OpenCvSharp;
+using System.Threading;
 
 namespace SD2CircleTool.ViewModels
 {
@@ -36,6 +37,9 @@ namespace SD2CircleTool.ViewModels
         private double _time = 5; public double Time { get { return _time; } set { SetProperty(ref _time, value); } }
         private int _id = 10; public int ID { get { return _id; } set { SetProperty(ref _id, value); } }
 
+        private bool isTest2 = false;
+        private Thread thr = null;
+        private Task t;
         private void updateCircle(double x, double y, double d)
         {
             CirX = 275 + (250 * (x - (d / 2)));
@@ -148,18 +152,94 @@ namespace SD2CircleTool.ViewModels
 
         public DelegateCommand TestCommand => new(() =>
         {
-            Point2f[] src = new Point2f[3];
-            Point2f[] dst = new Point2f[3];
-            src[2] = new Point2f(0, 0);
-            src[0] = new Point2f(1, 0);
-            src[1] = new Point2f(0, 1);
-            dst[2] = new Point2f(2, 0); // Translate x+2
-            dst[0] = new Point2f(2, 1);
-            dst[1] = new Point2f(1, 0);
-            Mat P = Cv2.GetAffineTransform(src, dst); // found: the translate value is always of 0, 0
-            Mat P2 = Cv2.EstimateAffinePartial2D(InputArray.Create<Point2f>(src), InputArray.Create<Point2f>(dst));
-            double[][] PArr= debugMat<double>(P2);
-            int test = 0;
+            VideoCapture cap = new VideoCapture("C:\\Users\\rajad\\Downloads\\2023-06-28_23-17-44.mp4");
+
+            Mat temp = new Mat();
+
+            int keyPressed = -1;
+
+            int frameAdvance = -1; //-1 is stopped
+
+            bool isPlaying = true;
+
+            bool stopPlaying = false;
+
+            MessageBox.Show(String.Format("FPS: {0}\nH: {1}\nW: {2}\nCount: {3}", 
+                cap.Get(VideoCaptureProperties.Fps),
+                cap.Get(VideoCaptureProperties.FrameHeight),
+                cap.Get(VideoCaptureProperties.FrameWidth),
+                cap.Get(VideoCaptureProperties.FrameCount)));
+
+            
+            while (cap.IsOpened())
+            {
+                // Check for keypresses
+
+                keyPressed = Cv2.WaitKey(1);
+
+                if (!(keyPressed == -1))
+                {
+                    switch (keyPressed)
+                    {
+                        case 115: // s - Play/Pause playback
+                            isPlaying = !isPlaying; break;
+                        case 100: // d - advance frame
+                            frameAdvance = 0; break;
+                        case 97: // a - rewind frame
+                            frameAdvance = -2; break;
+                        default:
+                            MessageBox.Show("Keypress code: " + keyPressed.ToString() +
+                                "\nFrame Count: " + cap.Get(VideoCaptureProperties.FrameCount) +
+                                "\nPos Frames: " + cap.Get(VideoCaptureProperties.PosFrames));
+                            stopPlaying = true;
+                            break;
+                    }
+                }
+                else
+                {
+                    frameAdvance = -1;
+                }
+
+                // Check to see whether playback should stop
+                if (stopPlaying) break;
+
+                // If no key pressed
+                if (isPlaying)
+                {
+                    if (cap.Read(temp))
+                    {
+                        Cv2.ImShow("cap", temp);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Restarting");
+                        cap.Set(VideoCaptureProperties.PosFrames, 0);
+                    }
+                }
+                else
+                {
+                    if (frameAdvance != -1)
+                    {
+                        cap.Set(VideoCaptureProperties.PosFrames, cap.Get(VideoCaptureProperties.PosFrames) + frameAdvance);
+                        if (cap.Read(temp))
+                        {
+                            Task.Run(() =>
+                            {
+                                Cv2.ImShow("cap", temp);
+
+                            });
+                        }
+                        else
+                        {
+                            cap.Set(VideoCaptureProperties.PosFrames, 0);
+                        }
+                    }
+                }
+             }
+
+            cap.Release();
+            Cv2.DestroyAllWindows();
+
         });
 
         T[][] debugMat<T>(Mat mat) where T : unmanaged
